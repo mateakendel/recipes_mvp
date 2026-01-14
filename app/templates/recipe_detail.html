@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recipe details</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="page">
+    <div class="page-header">
+        <a class="back-link" href="/all-recipes">⬅ Back to all recipes</a>
+    </div>
+
+    <div class="card recipe-detail">
+
+        <h1 id="title"></h1>
+
+        <div class="meta">
+            <span><strong>Category:</strong> <span id="category"></span></span>
+            <span><strong>Author:</strong> <span id="author"></span></span>
+        </div>
+
+        <hr>
+
+        <h3>Ingredients</h3>
+        <ul id="ingredients" class="ingredients-list"></ul>
+
+        <h3>Preparation</h3>
+        <p id="steps" class="steps-text"></p>
+
+    </div>
+
+</div>
+
+<script>
+const RECIPE_ID = "{{ recipe_id }}";
+
+fetch(`/recipes/${RECIPE_ID}`)
+    .then(res => res.json())
+    .then(r => {
+        document.getElementById("title").innerText = r.title;
+        document.getElementById("category").innerText = r.category;
+        document.getElementById("author").innerText = r.author;
+        document.getElementById("steps").innerText = r.steps;
+
+        const ul = document.getElementById("ingredients");
+        ul.innerHTML = "";
+
+        r.ingredients.forEach(i => {
+            const li = document.createElement("li");
+            li.innerText = i;
+            ul.appendChild(li);
+        });
+    });
+</script>
+
+</body>
+</html>
