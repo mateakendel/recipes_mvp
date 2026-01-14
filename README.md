@@ -131,21 +131,7 @@ graph LR
     style LoggedUser fill:#bbb,stroke:#333,stroke-width:2px,color:black
 ```
 
-## Budući planovi
-
-| Područje | Problem i Predloženo Rješenje |
-| :--- | :--- |
-| **1. Konzistentnost podataka** | Trenutno je sinkronizacija između MongoDB i Elasticsearch-a dual-write i ako aplikacija pukne nakon upisa u MongoDB, Elasticsearch ostaje neažuriran. Implementiralu bi Change Data Capture (CDC) s alatima kaošto su Debezium ili MongoDB Change Streams koji automatski slušaju promjene u bazi i šalju ih u Elasticsearch. Time se osigurava eventual consistency bez gubitka podataka. |
-| **2. Skalabilnost baze podataka** | Ako količina podataka naraste (TB podataka), jedan Primary čvor postaje usko grlo za zapise. Rješenje je da koristimo sharding (npr. particioniranje prema category_id ili user_id). Podjealom baze podatka na "shardove" se opterećenje zapisa raspoređuje na više poslužitelja. |
-| **3. Upravljanje sesijama** | Ako skaliramo Flask na više kontejnera, korisnik se mora ponovno prijaviti ako ga Load Balancer prebaci na drugi kontejner. To bi poboljšali tako da bi pohranili korisničke sesije u centralizirani Redis klaster i sve instance Flaska pristupaju istom Redisu, što omogućuje "stateless" aplikacijske servere. |
-| **4. Sigurnost i autentifikacija** | MVP koristi osnovnu autentifikaciju i nema naprednu zaštitu od napada. Implementirali bi OAuth2 / JSON Web Tokens i Rate Limiting. JWT za autentifikaciju API-ja i konfiguracija Traefika za Rate Limiting kako bi se spriječili DDoS napadi i zloupotreba API-ja. |
-| **5. Monitoring i logging** | Logovi su raspršeni po Docker kontejnerima pa je teško detektirati greške u produkciji. Centralizirali bi logging i monitoring s implementacijom ELK Stack-a (Elasticsearch, Logstash, Kibana) za prikupljanje logova te Prometheus-a i Grafane za praćenje metrika sustava (CPU, RAM, latency, broj zahtjeva). |
-| **6. Deployment i orkestracija** | Docker Compose je dobar za lokalni razvoj, ali ne nudi automatsko podizanje palih servisa ili rolling updates bez prekida rada. Rješili bi to s orkestracijom kontejnera. Migracija na Kubernetes klaster omogućuje automatsko skaliranje, self-healing i rolling updates bez downtime-a. |
-
----
-
 ## Design Rationale
-
 ### 1. MongoDB (NoSQL baza podataka)
 - Recepti su podaci koji prirodno nemaju strogu shemu (npr. broj koraka pripreme i broj sastojaka varira od recepta do recepta). JSON/BSON omogućuje nam da cijeli recept pohranimo kao jedan dokument, što pojednostavljuje dohvat podataka i ubrzava razvoj u odnosu na relacijske baze. Također MongoDB ima ugrađenu podršku za replikaciju koju koristimo za visoku dostupnost podataka.
 
@@ -157,6 +143,16 @@ graph LR
 
 ### 4. Docker & Traefik
 - Kontejnerizacija osigurava da aplikacija radi jednako na svakom računalu (lokalno i u oblaku). Traefik služi kao moderni Load Balancer i Reverse Proxy koji automatski otkriva nove servise, što nam omogućuje lako horizontalno skaliranje Flask instanci bez ručnog rekonfiguriranja.
+
+## Budući planovi
+| Područje | Problem i Predloženo Rješenje |
+| :--- | :--- |
+| **1. Konzistentnost podataka** | Trenutno je sinkronizacija između MongoDB i Elasticsearch-a dual-write i ako aplikacija pukne nakon upisa u MongoDB, Elasticsearch ostaje neažuriran. Implementiralu bi Change Data Capture (CDC) s alatima kaošto su Debezium ili MongoDB Change Streams koji automatski slušaju promjene u bazi i šalju ih u Elasticsearch. Time se osigurava eventual consistency bez gubitka podataka. |
+| **2. Skalabilnost baze podataka** | Ako količina podataka naraste (TB podataka), jedan Primary čvor postaje usko grlo za zapise. Rješenje je da koristimo sharding (npr. particioniranje prema category_id ili user_id). Podjealom baze podatka na "shardove" se opterećenje zapisa raspoređuje na više poslužitelja. |
+| **3. Upravljanje sesijama** | Ako skaliramo Flask na više kontejnera, korisnik se mora ponovno prijaviti ako ga Load Balancer prebaci na drugi kontejner. To bi poboljšali tako da bi pohranili korisničke sesije u centralizirani Redis klaster i sve instance Flaska pristupaju istom Redisu, što omogućuje "stateless" aplikacijske servere. |
+| **4. Sigurnost i autentifikacija** | MVP koristi osnovnu autentifikaciju i nema naprednu zaštitu od napada. Implementirali bi OAuth2 / JSON Web Tokens i Rate Limiting. JWT za autentifikaciju API-ja i konfiguracija Traefika za Rate Limiting kako bi se spriječili DDoS napadi i zloupotreba API-ja. |
+| **5. Monitoring i logging** | Logovi su raspršeni po Docker kontejnerima pa je teško detektirati greške u produkciji. Centralizirali bi logging i monitoring s implementacijom ELK Stack-a (Elasticsearch, Logstash, Kibana) za prikupljanje logova te Prometheus-a i Grafane za praćenje metrika sustava (CPU, RAM, latency, broj zahtjeva). |
+| **6. Deployment i orkestracija** | Docker Compose je dobar za lokalni razvoj, ali ne nudi automatsko podizanje palih servisa ili rolling updates bez prekida rada. Rješili bi to s orkestracijom kontejnera. Migracija na Kubernetes klaster omogućuje automatsko skaliranje, self-healing i rolling updates bez downtime-a. |
 
 ##  Pokretanje aplikacije
 Aplikacija se pokreće lokalno pomoću Dockera:
